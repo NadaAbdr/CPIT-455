@@ -3,13 +3,9 @@ package service.reservation;
 import model.customer.Customer;
 import model.reservation.Reservation;
 import model.room.IRoom;
+import model.room.enums.RoomType;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -119,5 +115,132 @@ public class ReservationService {
         }
 
         return allReservations;
+    }
+
+    // ================== الميثودات الجديدة ==================
+
+    /**
+     * إلغاء حجز معين لعميل
+     * Cancels a specific booking for a customer
+     * 
+     * @param customer العميل - The customer
+     * @param roomNumber رقم الغرفة - Room number
+     * @param checkInDate تاريخ تسجيل الدخول - Check-in date
+     * @return true إذا تم الإلغاء بنجاح، false إذا لم يتم العثور على الحجز
+     */
+    public boolean cancelReservation(final Customer customer, final String roomNumber, final Date checkInDate) {
+        if (customer == null || roomNumber == null || checkInDate == null) {
+            return false;
+        }
+
+        Collection<Reservation> customerReservations = getCustomersReservation(customer);
+
+        if (customerReservations == null || customerReservations.isEmpty()) {
+            return false;
+        }
+
+        // البحث عن الحجز المطلوب إلغاؤه
+        Reservation reservationToRemove = null;
+        for (Reservation reservation : customerReservations) {
+            if (reservation.getRoom().getRoomNumber().equals(roomNumber)
+                    && reservation.getCheckInDate().equals(checkInDate)) {
+                reservationToRemove = reservation;
+                break;
+            }
+        }
+
+        // إزالة الحجز إذا تم العثور عليه
+        if (reservationToRemove != null) {
+            customerReservations.remove(reservationToRemove);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * إيجاد الغرفة الأكثر حجزاً
+     * Finds which room number has been booked the most times
+     * 
+     * @return رقم الغرفة الأكثر شعبية أو null إذا لم يكن هناك حجوزات
+     */
+    public String findMostPopularRoom() {
+        final Collection<Reservation> allReservations = getAllReservations();
+
+        if (allReservations.isEmpty()) {
+            return null;
+        }
+
+        Map<String, Integer> roomCounts = new HashMap<>();
+
+        // عد الحجوزات لكل غرفة
+        for (Reservation reservation : allReservations) {
+            String roomNumber = reservation.getRoom().getRoomNumber();
+            roomCounts.put(roomNumber, roomCounts.getOrDefault(roomNumber, 0) + 1);
+        }
+
+        // إيجاد الغرفة الأكثر حجزاً
+        String mostPopularRoom = null;
+        int maxCount = 0;
+
+        for (Map.Entry<String, Integer> entry : roomCounts.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                mostPopularRoom = entry.getKey();
+            }
+        }
+
+        return mostPopularRoom;
+    }
+
+    /**
+     * البحث عن غرف متاحة من نوع معين
+     * Gets available rooms by specific room type
+     * 
+     * @param checkInDate تاريخ تسجيل الدخول - Check-in date
+     * @param checkOutDate تاريخ المغادرة - Check-out date
+     * @param roomType نوع الغرفة - Room type (SINGLE or DOUBLE)
+     * @return قائمة بالغرف المتاحة من النوع المحدد
+     */
+    public Collection<IRoom> getAvailableRoomsByType(final Date checkInDate, final Date checkOutDate, 
+                                                     final RoomType roomType) {
+        if (checkInDate == null || checkOutDate == null || roomType == null) {
+            return new LinkedList<>();
+        }
+
+        // الحصول على كل الغرف المتاحة
+        Collection<IRoom> availableRooms = findAvailableRooms(checkInDate, checkOutDate);
+
+        // تصفية حسب النوع
+        return availableRooms.stream()
+                .filter(room -> room.getRoomType().equals(roomType))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * الحصول على تاريخ حجوزات العميل مرتبة من الأحدث للأقدم
+     * Gets customer reservation history sorted from newest to oldest
+     * 
+     * @param customer العميل - The customer
+     * @return قائمة مرتبة بحجوزات العميل
+     */
+    public List<Reservation> getCustomerReservationHistory(final Customer customer) {
+        if (customer == null) {
+            return new LinkedList<>();
+        }
+
+        Collection<Reservation> customerReservations = getCustomersReservation(customer);
+
+        if (customerReservations == null || customerReservations.isEmpty()) {
+            return new LinkedList<>();
+        }
+
+        // تحويل Collection إلى List للترتيب
+        List<Reservation> sortedReservations = new LinkedList<>(customerReservations);
+
+        // ترتيب من الأحدث للأقدم (حسب تاريخ تسجيل الدخول)
+        sortedReservations.sort((r1, r2) -> r2.getCheckInDate().compareTo(r1.getCheckInDate()));
+
+        return sortedReservations;
     }
 }
