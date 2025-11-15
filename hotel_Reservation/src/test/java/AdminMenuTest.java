@@ -94,7 +94,7 @@ public void testEnterRoomPriceInvalidThenValid() {
 
 
 @Test
-public void testAddAnotherRoom_InvalidInputsThenNo() {
+public void testAddAnotherRoom_InvalidInput() {
     Scanner scanner = new Scanner("123");
 
     StringWriter sw = new StringWriter();
@@ -113,9 +113,8 @@ public void testAddAnotherRoom_InvalidInputsThenNo() {
 }
 
 @Test
-public void testAddAnotherRoom_NoInput() {
-    // المستخدم يكتب N يعني لا يضيف غرفة أخرى → يرجع للقائمة
-    Scanner scanner = new Scanner("123");
+public void testAddAnotherRoom_NInput() {
+    Scanner scanner = new Scanner("N");
 
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
