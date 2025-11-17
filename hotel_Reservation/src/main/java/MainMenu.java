@@ -15,7 +15,7 @@ import java.util.Scanner;
 public class MainMenu {
 
     private static final String DEFAULT_DATE_FORMAT = "MM/dd/yyyy";
-    private static final HotelResource hotelResource = HotelResource.getSingleton();
+    static final HotelResource hotelResource = HotelResource.getSingleton();
 
     public static void mainMenu() {
         String line = "";
@@ -36,7 +36,7 @@ public class MainMenu {
                             seeMyReservation();
                             break;
                         case '3':
-                            createAccount();
+                            createAccount(scanner);
                             break;
                         case '4':
                             AdminMenu.adminMenu();
@@ -57,14 +57,31 @@ public class MainMenu {
         }
     }
 
-    private static void findAndReserveRoom() {
+    static void findAndReserveRoom() {
+        // The method works like this
+        // 1- it takes the check-in date
+        // 2- it takes the check-out date
+        // 3- it checks if there is an available room or not
+        /*
+            =====================REFACTOR NOTES:=======================
+            OLD: not recursive;
+            NEW: while loop to be recursive; 
+            WHY: The recursion complicates testing,
+            in the old the recursive method came in from the getInputDate 
+            method which caused the scanner to be consumed incorrectly
+            */
         final Scanner scanner = new Scanner(System.in);
+            Date checkIn = null;
+            while (checkIn == null) {
+                System.out.println("Enter Check-In Date mm/dd/yyyy example 02/01/2020");
+                checkIn = getInputDate(scanner);
+            }
 
-        System.out.println("Enter Check-In Date mm/dd/yyyy example 02/01/2020");
-        Date checkIn = getInputDate(scanner);
-
-        System.out.println("Enter Check-Out Date mm/dd/yyyy example 02/21/2020");
-        Date checkOut = getInputDate(scanner);
+            Date checkOut = null;
+            while (checkOut == null) {
+                System.out.println("Enter Check-Out Date mm/dd/yyyy example 02/21/2020");
+                checkOut = getInputDate(scanner);
+            }
 
         if (checkIn != null && checkOut != null) {
             Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
@@ -96,10 +113,15 @@ public class MainMenu {
             return new SimpleDateFormat(DEFAULT_DATE_FORMAT).parse(scanner.nextLine());
         } catch (ParseException ex) {
             System.out.println("Error: Invalid date.");
-            findAndReserveRoom();
+            /*
+            =====================REFACTOR NOTES:=======================
+            OLD: findAndReserveRoom();
+            NEW: return null; 
+            WHY: The findAndReserveRoom is a recursion creates a new Scanner,
+            which consumes the same System.in input thats why its much better to move the recursion to findAndReserveRoom
+            */
+            return null; 
         }
-
-        return null;
     }
 
     private static void reserveRoom(final Scanner scanner, final Date checkInDate,
@@ -169,29 +191,32 @@ public class MainMenu {
             reservations.forEach(reservation -> System.out.println("\n" + reservation));
         }
     }
-
-    private static void createAccount() {
-        final Scanner scanner = new Scanner(System.in);
-
+        /*
+            =====================REFACTOR NOTES:=======================
+            OLD: createAccount();
+            NEW: createAccount(Scanner scanner)
+            WHY: No new Scanner per recursion, since each time the when the method is called a new Scanner is created
+            */
+        static void createAccount(Scanner scanner) {
         System.out.println("Enter Email format: name@domain.com");
-        final String email = scanner.nextLine();
+        String email = scanner.nextLine();
 
         System.out.println("First Name:");
-        final String firstName = scanner.nextLine();
+        String firstName = scanner.nextLine();
 
         System.out.println("Last Name:");
-        final String lastName = scanner.nextLine();
+        String lastName = scanner.nextLine();
 
         try {
             hotelResource.createACustomer(email, firstName, lastName);
             System.out.println("Account created successfully!");
-
             printMainMenu();
         } catch (IllegalArgumentException ex) {
             System.out.println(ex.getLocalizedMessage());
-            createAccount();
+            createAccount(scanner); // pass the same Scanner
         }
     }
+
 
     public static void printMainMenu()
     {
