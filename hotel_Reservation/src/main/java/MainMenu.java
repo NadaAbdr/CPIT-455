@@ -175,13 +175,51 @@ public class MainMenu {
         }
     }
 
+    
+    // Displays the current customer's reservations and optionally allows cancellation
     private static void seeMyReservation() {
         final Scanner scanner = new Scanner(System.in);
 
         System.out.println("Enter your Email format: name@domain.com");
         final String customerEmail = scanner.nextLine();
 
-        printReservations(hotelResource.getCustomersReservations(customerEmail));
+        Collection<Reservation> reservations = hotelResource.getCustomersReservations(customerEmail);
+
+        if (reservations == null || reservations.isEmpty()) {
+            System.out.println("No reservations found.");
+        } else {
+            // Print all existing reservations for this customer
+            printReservations(reservations);
+
+            // Offer the user the option to cancel one of their reservations
+            System.out.println("\nWould you like to cancel a reservation? (y/n)");
+            String choice = scanner.nextLine();
+
+            if ("y".equalsIgnoreCase(choice)) {
+                cancelReservation(scanner, customerEmail);
+            }
+        }
+    }
+
+    private static void cancelReservation(Scanner scanner, String customerEmail) {
+        System.out.println("Enter the ROOM NUMBER of the reservation you want to cancel:");
+        final String roomNumber = scanner.nextLine();
+
+        System.out.println("Enter the CHECK-IN DATE (mm/dd/yyyy) of the reservation to cancel:");
+        Date checkInDate = getInputDate(scanner);
+
+        if (checkInDate != null) {
+            boolean success = hotelResource.cancelReservation(customerEmail, roomNumber, checkInDate);
+
+            if (success) {
+                System.out.println("Reservation for room " + roomNumber + " cancelled successfully.");
+            } else {
+                System.out.println("Error: Reservation not found or unable to cancel. Check room number and date.");
+            }
+        } else {
+            System.out.println("Invalid date format. Returning to main menu.");
+        }
+        printMainMenu();
     }
 
     private static void printReservations(final Collection<Reservation> reservations) {

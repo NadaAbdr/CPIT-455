@@ -44,4 +44,9 @@ public class AdminResource {
     public void displayAllReservations() {
         reservationService.printAllReservation();
     }
+    
+    // Retrieves the room number that has been booked the most times
+    public String findMostPopularRoom() {
+        return reservationService.findMostPopularRoom();
+    }
 }

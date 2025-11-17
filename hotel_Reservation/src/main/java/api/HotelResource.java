@@ -64,4 +64,16 @@ public class HotelResource {
     public Date addDefaultPlusDays(final Date date) {
         return reservationService.addDefaultPlusDays(date);
     }
+    
+
+    public boolean cancelReservation(String customerEmail, String roomNumber, Date checkInDate) {
+        // Retrieve the Customer object using the provided email
+        final Customer customer = getCustomer(customerEmail);
+
+        if (customer == null) {
+            return false;
+        }
+
+        return reservationService.cancelReservation(customer, roomNumber, checkInDate);
+    }
 }

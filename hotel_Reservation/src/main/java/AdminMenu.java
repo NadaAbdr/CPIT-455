@@ -55,6 +55,9 @@ static void adminMenu(Scanner scanner, PrintWriter out) {  //done
                         addRoom();
                         break;
                     case '5':
+                        findMostPopularRoom();
+                        break;
+                    case '6':
                         MainMenu.printMainMenu();
                         break;
                     default:
@@ -64,7 +67,7 @@ static void adminMenu(Scanner scanner, PrintWriter out) {  //done
             } else {
                 out.println("Error: Invalid action\n");
             }
-        } while (line.charAt(0) != '5' || line.length() != 1);
+        } while (line.charAt(0) != '6' || line.length() != 1);
     } catch (StringIndexOutOfBoundsException ex) {
         out.println("Empty input received. Exiting program...");
     }
@@ -78,7 +81,8 @@ static void adminMenu(Scanner scanner, PrintWriter out) {  //done
     out.println("2. Display all rooms");
     out.println("3. Display all reservations");
     out.println("4. Add a room");
-    out.println("5. Back to main menu");
+    out.println("5. Find most popular room");
+    out.println("6. Back to main menu");
 }
 
 
@@ -192,4 +196,17 @@ static void addAnotherRoom(Scanner scanner, PrintWriter out) {
     private static void displayAllReservations() {
         adminResource.displayAllReservations();
     }
+    
+
+    // Displays the most frequently booked room based on existing reservations
+    private static void findMostPopularRoom() {
+        final String popularRoom = adminResource.findMostPopularRoom();
+
+        if (popularRoom == null) {
+            System.out.println("No reservations found to determine the most popular room.");
+        } else {
+            System.out.println("The most popular room is: " + popularRoom);
+        }
+    }
+
 }
