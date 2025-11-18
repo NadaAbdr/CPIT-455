@@ -124,7 +124,7 @@ public class MainMenu {
         }
     }
 
-    private static void reserveRoom(final Scanner scanner, final Date checkInDate,
+    static void reserveRoom(final Scanner scanner, final Date checkInDate,
                                     final Date checkOutDate, final Collection<IRoom> rooms) {
         System.out.println("Would you like to book? y/n");
         final String bookRoom = scanner.nextLine();
@@ -177,7 +177,7 @@ public class MainMenu {
 
     
     // Displays the current customer's reservations and optionally allows cancellation
-    private static void seeMyReservation() {
+    static void seeMyReservation() {
         final Scanner scanner = new Scanner(System.in);
 
         System.out.println("Enter your Email format: name@domain.com");
@@ -222,7 +222,7 @@ public class MainMenu {
         printMainMenu();
     }
 
-    private static void printReservations(final Collection<Reservation> reservations) {
+    static void printReservations(final Collection<Reservation> reservations) {
         if (reservations == null || reservations.isEmpty()) {
             System.out.println("No reservations found.");
         } else {

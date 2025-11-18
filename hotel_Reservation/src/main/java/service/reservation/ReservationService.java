@@ -41,7 +41,16 @@ public class ReservationService {
     public Reservation reserveARoom(final Customer customer, final IRoom room,
                                     final Date checkInDate, final Date checkOutDate) {
         final Reservation reservation = new Reservation(customer, room, checkInDate, checkOutDate);
-
+        if(customer == null){
+            throw new NullPointerException("Customer cannot be null");
+        }
+        if(room == null){
+            throw new NullPointerException("room cannot be null");
+        }
+        if(checkInDate == null || checkOutDate == null){
+            throw new NullPointerException("dates cannot be null");
+        }
+        
         Collection<Reservation> customerReservations = getCustomersReservation(customer);
 
         if (customerReservations == null) {

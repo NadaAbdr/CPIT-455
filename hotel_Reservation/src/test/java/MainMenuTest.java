@@ -8,10 +8,12 @@ import api.HotelResource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Collection;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Scanner;
+import model.customer.Customer;
 import model.room.IRoom;
 import model.room.Room;
 import model.room.enums.RoomType;
@@ -92,7 +94,7 @@ public class MainMenuTest {
 
         String printed = output.toString();
         assertTrue(
-            printed.contains("Unknown action") || printed.contains("Error: Invalid action") || printed.contains("Error: Invalid date.")
+            printed.contains("Unknown action") || printed.contains("Error: Invalid action")
         );    
     }
     
@@ -153,8 +155,88 @@ public class MainMenuTest {
         String printed = output.toString();
         assertTrue(printed.contains("Error: Invalid date."));
     }
+    @Test
+public void ReserveRoom_ValidInput() {
+    // 1️⃣ Setup a fake room
+    IRoom fakeRoom = new Room("101", 100.0, RoomType.SINGLE);
+    String email = "test@example.com";
+    AdminResource.getSingleton().addRoom(Collections.singletonList(fakeRoom));
+    HotelResource.getSingleton().createACustomer(email, "John", "Doe");
+
+    String fakeInput =
+            "y\n" +           // Would you like to book?
+            "y\n" +           // Do you have an account?
+            email + "\n" +    // Email input
+            "101\n";          // Room number
+
+    // 4️⃣ Replace System.in with fake input
+    ByteArrayInputStream input = new ByteArrayInputStream(fakeInput.getBytes());
+    System.setIn(input);
+
+    // 5️⃣ Capture System.out
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(output));
+
+    // 6️⃣ Call the method
+    Scanner scanner = new Scanner(System.in);
+    Date checkIn = new GregorianCalendar(2025, Calendar.FEBRUARY, 1).getTime();
+    Date checkOut = new GregorianCalendar(2025, Calendar.FEBRUARY, 3).getTime();
+
+    MainMenu.reserveRoom(scanner, checkIn, checkOut, AdminResource.getSingleton().getAllRooms());
+
+    // 7️⃣ Verify output
+    String printed = output.toString();
+    assertTrue(printed.contains("Reservation created successfully!"));
+}
+/*
+     @Test
+     public void testFindAndReserveRoom_WithAvailableRoom_Valid(){
+        Room fakeRoom = new Room("101", 100.0, RoomType.SINGLE);
+        Customer fakeCustomer = new Customer("test@example.com","John","Doe");
+        AdminResource.getSingleton().addRoom(Collections.singletonList(fakeRoom));
+        HotelResource.getSingleton().createACustomer("test@example.com", "John", "Doe");
+
+        // fake user input
+        String fakeInput =
+                "02/01/2025\n" +    // valid check-in date retry
+                "02/03/2025\n" +    // valid check-out date retry
+                "y\n" +             // book
+                "y\n"+
+                "test@example.com\n"+
+                "101\n";              // i have an account
+
+        System.setIn(new ByteArrayInputStream(fakeInput.getBytes())); //replace the scanner's input with this fake input
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output)); // take what is printed on the console
+
+        MainMenu.findAndReserveRoom();  // call the method
+
+        String printed = output.toString();
+        assertTrue(printed.contains("Reservation created successfully!"));
+     }*/
     /**
-     * Test invalid email then valid
+     * Test with valid email but no results were found
+    **/
+     @Test
+     public void TestseeMyReservation_noResult(){
+         String fakeinput = "Invalid@example.com\n";
+         ByteArrayInputStream input = new ByteArrayInputStream(fakeinput.getBytes());
+         System.setIn(input); //replace the scanner's input with this fake input
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output)); // take what is printed on the console
+
+        MainMenu.seeMyReservation();// call the method
+        String printed = output.toString(); //convert to string
+        assertTrue(printed.contains("No reservations found."));
+     }
+     /**
+     * Test with valid email but no results were found
+    **/
+
+    /**
+     * Test invalid email then valid user input
      */
      @Test
     public void testCreateAccount_InvalidThenValid() {
