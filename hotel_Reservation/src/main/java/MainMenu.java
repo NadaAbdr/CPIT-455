@@ -30,10 +30,10 @@ public class MainMenu {
                 if (line.length() == 1) {
                     switch (line.charAt(0)) {
                         case '1':
-                            findAndReserveRoom();
+                            findAndReserveRoom(scanner);
                             break;
                         case '2':
-                            seeMyReservation();
+                            seeMyReservation(scanner);
                             break;
                         case '3':
                             createAccount(scanner);
@@ -57,7 +57,7 @@ public class MainMenu {
         }
     }
 
-    static void findAndReserveRoom() {
+    static void findAndReserveRoom(final Scanner scanner) {
         // The method works like this
         // 1- it takes the check-in date
         // 2- it takes the check-out date
@@ -70,7 +70,6 @@ public class MainMenu {
             in the old the recursive method came in from the getInputDate 
             method which caused the scanner to be consumed incorrectly
             */
-        final Scanner scanner = new Scanner(System.in);
             Date checkIn = null;
             while (checkIn == null) {
                 System.out.println("Enter Check-In Date mm/dd/yyyy example 02/01/2020");
@@ -177,8 +176,7 @@ public class MainMenu {
 
     
     // Displays the current customer's reservations and optionally allows cancellation
-    static void seeMyReservation() {
-        final Scanner scanner = new Scanner(System.in);
+    static void seeMyReservation(Scanner scanner) {
 
         System.out.println("Enter your Email format: name@domain.com");
         final String customerEmail = scanner.nextLine();
@@ -201,7 +199,7 @@ public class MainMenu {
         }
     }
 
-    private static void cancelReservation(Scanner scanner, String customerEmail) {
+    static void cancelReservation(Scanner scanner, String customerEmail) {
         System.out.println("Enter the ROOM NUMBER of the reservation you want to cancel:");
         final String roomNumber = scanner.nextLine();
 
