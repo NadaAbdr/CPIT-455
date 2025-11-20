@@ -39,18 +39,30 @@ public class ReservationService {
     }
 
     public Reservation reserveARoom(final Customer customer, final IRoom room,
-                                    final Date checkInDate, final Date checkOutDate) {
-        final Reservation reservation = new Reservation(customer, room, checkInDate, checkOutDate);
-        if(customer == null){
+            final Date checkInDate, final Date checkOutDate) {
+
+        if (customer == null) {
             throw new NullPointerException("Customer cannot be null");
         }
-        if(room == null){
+        if (room == null) {
             throw new NullPointerException("room cannot be null");
         }
-        if(checkInDate == null || checkOutDate == null){
+        if (checkInDate == null || checkOutDate == null) {
             throw new NullPointerException("dates cannot be null");
         }
-        
+
+        // Check if this room is already reserved in the same date range
+        for (Reservation existing : getAllReservations()) {
+            if (existing.getRoom().getRoomNumber().equals(room.getRoomNumber())
+                    && reservationOverlaps(existing, checkInDate, checkOutDate)) {
+                // prevent double booking by throwing an exception
+                throw new IllegalStateException("Room is already booked for the selected period");
+            }
+        }
+
+        // Create a new reservation object after passing all validations
+        final Reservation reservation = new Reservation(customer, room, checkInDate, checkOutDate);
+
         Collection<Reservation> customerReservations = getCustomersReservation(customer);
 
         if (customerReservations == null) {

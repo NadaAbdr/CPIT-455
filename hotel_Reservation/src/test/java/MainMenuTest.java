@@ -8,10 +8,12 @@ import api.HotelResource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map;
 import java.util.Scanner;
 import model.customer.Customer;
 import model.room.IRoom;
@@ -51,7 +53,17 @@ public class MainMenuTest {
     }
     
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        // Clear ReservationService singleton state before each test
+        ReservationService service = ReservationService.getSingleton();
+
+        Field roomsField = ReservationService.class.getDeclaredField("rooms");
+        roomsField.setAccessible(true);
+        ((Map<?, ?>) roomsField.get(service)).clear();
+
+        Field reservationsField = ReservationService.class.getDeclaredField("reservations");
+        reservationsField.setAccessible(true);
+        ((Map<?, ?>) reservationsField.get(service)).clear();
     }
     
     @After
@@ -245,11 +257,6 @@ public class MainMenuTest {
      */
     @Test
     public void testFindAndReserveRoom_WithoutAvailableRoom_validDate() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        // Clear the internal maps (rooms and reservations) before each test (Stole it from Samia's class :3)
-        ReservationService service = ReservationService.getSingleton();
-        java.lang.reflect.Field roomsField = ReservationService.class.getDeclaredField("rooms");
-        roomsField.setAccessible(true);
-        ((java.util.Map<?, ?>) roomsField.get(service)).clear();
         String fakeInput =
                 "02/10/2025\n" +
                 "02/13/2025\n"+
