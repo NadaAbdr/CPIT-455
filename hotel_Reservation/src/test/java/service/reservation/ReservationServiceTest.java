@@ -177,7 +177,7 @@ public class ReservationServiceTest {
     /**
       Case 6: Two different customers booking the same room for the same date range
     **/
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testReserveARoom_SameRoomDifferentCustomerSameDates() {
         Customer customerA = createCustomer("customerA@test.com");
         Customer customerB = createCustomer("customerB@test.com");
@@ -187,14 +187,12 @@ public class ReservationServiceTest {
         Date checkIn = createDate(2026, java.util.Calendar.JUNE, 1);
         Date checkOut = createDate(2026, java.util.Calendar.JUNE, 5);
 
+        // First reservation should succeed
         Reservation rA = service.reserveARoom(customerA, room, checkIn, checkOut);
-        Reservation rB = service.reserveARoom(customerB, room, checkIn, checkOut);
-
         assertNotNull("Reservation A must be created.", rA);
-        assertNotNull("Reservation B must be created.", rB);
-        
-        assertEquals("Customer A should have 1 reservation", 1, service.getCustomersReservation(customerA).size());
-        assertEquals("Customer B should have 1 reservation", 1, service.getCustomersReservation(customerB).size());
+
+        // Second reservation for the same room & same dates should fail
+        service.reserveARoom(customerB, room, checkIn, checkOut);
     }
    
     
