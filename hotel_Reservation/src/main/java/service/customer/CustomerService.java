@@ -16,7 +16,8 @@ public class CustomerService {
 
     private final Map<String, Customer> customers = new HashMap<>();
 
-    private CustomerService() {}
+    private CustomerService() {
+    }
 
     public static CustomerService getSingleton() {
         return SINGLETON;
@@ -32,5 +33,16 @@ public class CustomerService {
 
     public Collection<Customer> getAllCustomers() {
         return customers.values();
+    }
+
+    public void removeCustomer(String email) {
+        customers.remove(email);
+    }
+
+// Add this method to clear all customers
+    public void clearAllCustomers() {
+        if (customers != null) {
+            customers.clear();
+        }
     }
 }

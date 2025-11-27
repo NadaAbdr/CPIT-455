@@ -25,13 +25,21 @@ public class Customer {
     private void isValidEmail(final String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX_PATTERN);
 
-        if(!pattern.matcher(email).matches()) {
+        if (!pattern.matcher(email).matches()) {
             throw new IllegalArgumentException("Invalid email");
         }
     }
 
     public String getEmail() {
         return this.email;
+    }
+
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    public String getLastName() {
+        return this.lastName;
     }
 
     @Override

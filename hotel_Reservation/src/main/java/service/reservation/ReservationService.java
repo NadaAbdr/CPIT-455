@@ -20,7 +20,8 @@ public class ReservationService {
     private final Map<String, IRoom> rooms = new HashMap<>();
     private final Map<String, Collection<Reservation>> reservations = new HashMap<>();
 
-    private ReservationService() {}
+    private ReservationService() {
+    }
 
     public static ReservationService getSingleton() {
         return SINGLETON;
@@ -107,7 +108,7 @@ public class ReservationService {
     }
 
     private boolean reservationOverlaps(final Reservation reservation, final Date checkInDate,
-                                        final Date checkOutDate){
+            final Date checkOutDate) {
         return checkInDate.before(reservation.getCheckOutDate())
                 && checkOutDate.after(reservation.getCheckInDate());
     }
@@ -131,7 +132,7 @@ public class ReservationService {
     private Collection<Reservation> getAllReservations() {
         final Collection<Reservation> allReservations = new LinkedList<>();
 
-        for(Collection<Reservation> reservations : reservations.values()) {
+        for (Collection<Reservation> reservations : reservations.values()) {
             allReservations.addAll(reservations);
         }
 
@@ -139,11 +140,9 @@ public class ReservationService {
     }
 
     // ================== الميثودات الجديدة ==================
-
     /**
-     * إلغاء حجز معين لعميل
-     * Cancels a specific booking for a customer
-     * 
+     * إلغاء حجز معين لعميل Cancels a specific booking for a customer
+     *
      * @param customer العميل - The customer
      * @param roomNumber رقم الغرفة - Room number
      * @param checkInDate تاريخ تسجيل الدخول - Check-in date
@@ -180,9 +179,9 @@ public class ReservationService {
     }
 
     /**
-     * إيجاد الغرفة الأكثر حجزاً
-     * Finds which room number has been booked the most times
-     * 
+     * إيجاد الغرفة الأكثر حجزاً Finds which room number has been booked the
+     * most times
+     *
      * @return رقم الغرفة الأكثر شعبية أو null إذا لم يكن هناك حجوزات
      */
     public String findMostPopularRoom() {
@@ -215,16 +214,15 @@ public class ReservationService {
     }
 
     /**
-     * البحث عن غرف متاحة من نوع معين
-     * Gets available rooms by specific room type
-     * 
+     * البحث عن غرف متاحة من نوع معين Gets available rooms by specific room type
+     *
      * @param checkInDate تاريخ تسجيل الدخول - Check-in date
      * @param checkOutDate تاريخ المغادرة - Check-out date
      * @param roomType نوع الغرفة - Room type (SINGLE or DOUBLE)
      * @return قائمة بالغرف المتاحة من النوع المحدد
      */
-    public Collection<IRoom> getAvailableRoomsByType(final Date checkInDate, final Date checkOutDate, 
-                                                     final RoomType roomType) {
+    public Collection<IRoom> getAvailableRoomsByType(final Date checkInDate, final Date checkOutDate,
+            final RoomType roomType) {
         if (checkInDate == null || checkOutDate == null || roomType == null) {
             return new LinkedList<>();
         }
@@ -239,9 +237,9 @@ public class ReservationService {
     }
 
     /**
-     * الحصول على تاريخ حجوزات العميل مرتبة من الأحدث للأقدم
-     * Gets customer reservation history sorted from newest to oldest
-     * 
+     * الحصول على تاريخ حجوزات العميل مرتبة من الأحدث للأقدم Gets customer
+     * reservation history sorted from newest to oldest
+     *
      * @param customer العميل - The customer
      * @return قائمة مرتبة بحجوزات العميل
      */
@@ -263,5 +261,18 @@ public class ReservationService {
         sortedReservations.sort((r1, r2) -> r2.getCheckInDate().compareTo(r1.getCheckInDate()));
 
         return sortedReservations;
+    }
+
+// Add these methods to clear data
+    public void clearAllRooms() {
+        if (rooms != null) {
+            rooms.clear();
+        }
+    }
+
+    public void clearAllReservations() {
+        if (reservations != null) {
+            reservations.clear();
+        }
     }
 }
