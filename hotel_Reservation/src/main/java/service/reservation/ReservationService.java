@@ -163,7 +163,7 @@ public class ReservationService {
         Reservation reservationToRemove = null;
         for (Reservation reservation : customerReservations) {
             if (reservation.getRoom().getRoomNumber().equals(roomNumber)
-                    && reservation.getCheckInDate().equals(checkInDate)) {
+                    && reservation.getCheckInDate().compareTo(checkInDate) == 0) {
                 reservationToRemove = reservation;
                 break;
             }

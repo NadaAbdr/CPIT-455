@@ -1,7 +1,6 @@
 import api.HotelResource;
 import model.reservation.Reservation;
 import model.room.IRoom;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -13,7 +12,7 @@ import java.util.Scanner;
  *
  */
 public class MainMenu {
-
+    
     private static final String DEFAULT_DATE_FORMAT = "MM/dd/yyyy";
     static final HotelResource hotelResource = HotelResource.getSingleton();
 
@@ -107,7 +106,7 @@ public class MainMenu {
         }
     }
 
-    private static Date getInputDate(final Scanner scanner) {
+    static Date getInputDate(final Scanner scanner) {
         try {
             return new SimpleDateFormat(DEFAULT_DATE_FORMAT).parse(scanner.nextLine());
         } catch (ParseException ex) {
@@ -122,51 +121,61 @@ public class MainMenu {
             return null; 
         }
     }
-
+    // refactored since this method cant handel other inputs other than y/n and added loop too
     static void reserveRoom(final Scanner scanner, final Date checkInDate,
-                                    final Date checkOutDate, final Collection<IRoom> rooms) {
-        System.out.println("Would you like to book? y/n");
-        final String bookRoom = scanner.nextLine();
+    final Date checkOutDate, final Collection<IRoom> rooms) {
+    while (true) {
+        System.out.println("Would you like to book? (y/n)");
+        final String bookRoom = scanner.nextLine().trim().toLowerCase();
 
         if ("y".equals(bookRoom)) {
-            System.out.println("Do you have an account with us? y/n");
-            final String haveAccount = scanner.nextLine();
+            System.out.println("Do you have an account with us? (y/n)");
+            final String haveAccount = scanner.nextLine().trim().toLowerCase();
 
             if ("y".equals(haveAccount)) {
                 System.out.println("Enter Email format: name@domain.com");
                 final String customerEmail = scanner.nextLine();
 
                 if (hotelResource.getCustomer(customerEmail) == null) {
-                    System.out.println("Customer not found.\nYou may need to create a new account.");
-                } else {
-                    System.out.println("What room number would you like to reserve?");
-                    final String roomNumber = scanner.nextLine();
+                    System.out.println("Customer not found. You may need to create a new account.");
+                    break;
+                }
+                else{
+                System.out.println("What room number would you like to reserve?");
+                final String roomNumber = scanner.nextLine();
 
-                    if (rooms.stream().anyMatch(room -> room.getRoomNumber().equals(roomNumber))) {
+                if (rooms.stream().anyMatch(room -> room.getRoomNumber().equals(roomNumber))) {
                         final IRoom room = hotelResource.getRoom(roomNumber);
 
                         final Reservation reservation = hotelResource
                                 .bookARoom(customerEmail, room, checkInDate, checkOutDate);
                         System.out.println("Reservation created successfully!");
                         System.out.println(reservation);
-                    } else {
-                        System.out.println("Error: room number not available.\nStart reservation again.");
-                    }
+                        break;
+                } else {
+                    System.out.println("Error: room number not available. Start reservation again.");
+                    break;
+                }
                 }
 
-                printMainMenu();
-            } else {
+            } else if ("n".equals(haveAccount)) {
                 System.out.println("Please, create an account.");
-                printMainMenu();
+                break;
+            } else {
+                System.out.println("Invalid input. Expected 'y' or 'n'.");
+                continue;
             }
-        } else if ("n".equals(bookRoom)){
-            printMainMenu();
+        } else if ("n".equals(bookRoom)) {
+            System.out.println("Booking cancelled.");
+            break;
         } else {
-            reserveRoom(scanner, checkInDate, checkOutDate, rooms);
+            System.out.println("Invalid input. Please enter 'y' or 'n'.");
         }
     }
 
-    private static void printRooms(final Collection<IRoom> rooms) {
+    printMainMenu();
+}
+    static void printRooms(final Collection<IRoom> rooms) {
         if (rooms.isEmpty()) {
             System.out.println("No rooms found.");
         } else {
@@ -180,6 +189,7 @@ public class MainMenu {
 
         System.out.println("Enter your Email format: name@domain.com");
         final String customerEmail = scanner.nextLine();
+        String choice;
 
         Collection<Reservation> reservations = hotelResource.getCustomersReservations(customerEmail);
 
@@ -188,15 +198,24 @@ public class MainMenu {
         } else {
             // Print all existing reservations for this customer
             printReservations(reservations);
+            
+            // test failed since the method cant handel other inputs other than y 
+            while (true) {
+            System.out.println("Would you like to cancel a reservation? (y/n)");
+            choice = scanner.nextLine();
 
-            // Offer the user the option to cancel one of their reservations
-            System.out.println("\nWould you like to cancel a reservation? (y/n)");
-            String choice = scanner.nextLine();
-
-            if ("y".equalsIgnoreCase(choice)) {
+            if("y".equals(choice)) {
                 cancelReservation(scanner, customerEmail);
+                break;
+            } else if ("n".equals(choice)) {
+                System.out.println("No cancellation performed.");
+                break;
+            } else {
+                System.out.println("Invalid input. Please enter 'y' or 'n'.");
+            }
             }
         }
+        printMainMenu();
     }
 
     static void cancelReservation(Scanner scanner, String customerEmail) {

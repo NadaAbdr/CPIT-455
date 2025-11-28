@@ -61,7 +61,7 @@ public class AdminResourceComponentTest {
     /**
      * Helper method to clear all data from singleton services.
      * This ensures test isolation and prevents state pollution between tests.
-     */
+     */ 
     private void clearAllData() {
         try {
             customerService.clearAllCustomers();
