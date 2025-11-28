@@ -7,7 +7,6 @@ package service.reservation;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import model.customer.Customer;
 import model.reservation.Reservation;
 import model.room.IRoom;
@@ -24,11 +23,14 @@ import static org.junit.Assert.*;
  *
  * @author alhas
  */
-public class ReservationServiceTest {
+
+// COMPONENT TEST for ReservationService
+
+public class ReservationServiceComponentTest {
     
     private ReservationService service;
     
-    public ReservationServiceTest() {
+    public ReservationServiceComponentTest() {
     }
     
     @BeforeClass
@@ -58,7 +60,7 @@ public class ReservationServiceTest {
     public void tearDown() {
     }
 
-    // ====== Helper methods ======
+    // -------- Helper methods --------
 
     private Date createDate(int year, int month, int day) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
@@ -77,10 +79,7 @@ public class ReservationServiceTest {
     
     // Function 1 : reserveARoom
 
-    /**
-      Case 1: First reservation for a new customer (no previous reservations)
-      Verifies that the reservation is created, stored, and associated correctly with the customer
-    **/
+    // Case 1: First reservation for a new customer (no previous reservations)
     @Test
     public void testReserveARoom_FirstReservationForCustomer() {
         Customer customer = createCustomer("user1@example.com");
@@ -105,10 +104,7 @@ public class ReservationServiceTest {
         assertTrue("Returned reservation must be stored in customer's reservations", customerReservations.contains(reservation));
     }
 
-    /**
-      Case 2: Additional reservation for the same customer (customer already has previous reservations)
-      Ensures multiple reservations are stored and both are present in the list
-    **/
+    // Case 2: Additional reservation for the same customer (customer already has previous reservations)
     @Test
     public void testReserveARoom_AdditionalReservationForSameCustomer() {
         Customer customer = createCustomer("user2@example.com");
@@ -132,10 +128,10 @@ public class ReservationServiceTest {
         assertTrue("Second reservation must be stored", customerReservations.contains(r2));
     }
 
-    /**
+    /*
       Case 3: customer = null
-      The current implementation throws a NullPointerException when accessing customer.getEmail()
-    **/
+      The current implementation throws a NullPointerException 
+    */
     @Test(expected = NullPointerException.class)
     public void testReserveARoom_NullCustomerThrowsException() {
         // null customer
@@ -144,39 +140,54 @@ public class ReservationServiceTest {
                 createDate(2025, java.util.Calendar.MARCH, 3));
     }
 
-    /**
+    /*
       Case 4: room = null
-      Depending on the Reservation constructor, this results in a NullPointerException.
-    **/
+      Depending on the Reservation constructor, this results in a NullPointerException
+    */
     @Test(expected = NullPointerException.class)
     public void testReserveARoom_NullRoomThrowsException() {
         Customer customer = createCustomer("nullroom@test.com");
         // null room
-        service.reserveARoom(customer, null, 
-                            createDate(2025, java.util.Calendar.APRIL, 1), 
-                            createDate(2025, java.util.Calendar.APRIL, 3));
+        service.reserveARoom(customer, null,
+                createDate(2025, java.util.Calendar.APRIL, 1),
+                createDate(2025, java.util.Calendar.APRIL, 3));
     }
 
-    /**
-      Case 5: checkInDate = null
-      The service does not validate date parameters, so passing null leads to
-      a NullPointerException inside the Reservation object
-    **/
+    /*
+      Case 5: checkInDate is null
+      The method should throw a NullPointerException according to implementation
+    */
     @Test(expected = NullPointerException.class)
-    public void testReserveARoom_NullDatesThrowException() {
+    public void testReserveARoom_NullCheckInDate_ThrowException() {
         Customer customer = createCustomer("nulldate@test.com");
         IRoom room = createRoom("401", 250.0, RoomType.DOUBLE);
         service.addRoom(room);
-
         // null checkInDate
-        service.reserveARoom(customer, room, 
-                            null, 
-                            createDate(2025, java.util.Calendar.MAY, 5));
+        service.reserveARoom(customer, room,
+                null,
+                createDate(2025, java.util.Calendar.MAY, 5));
+    }
+
+    /*
+      Case 6: checkOutDate is null
+      The method should throw a NullPointerException according to implementation
+     */
+    @Test(expected = NullPointerException.class)
+    public void testReserveARoom_NullCheckOutDate_ThrowsException() {
+        Customer customer = createCustomer("nulldate@test.com");
+        IRoom room = createRoom("401", 200.0, RoomType.SINGLE);
+        service.addRoom(room);
+        // null checkInDate
+        service.reserveARoom(
+                customer,
+                room,
+                createDate(2025, java.util.Calendar.MAY, 5),
+                null );
     }
     
-    /**
-      Case 6: Two different customers booking the same room for the same date range
-    **/
+    /*
+      Case 7: Two different customers booking the same room for the same date range
+    */
     @Test(expected = IllegalStateException.class)
     public void testReserveARoom_SameRoomDifferentCustomerSameDates() {
         Customer customerA = createCustomer("customerA@test.com");
@@ -189,19 +200,18 @@ public class ReservationServiceTest {
 
         // First reservation should succeed
         Reservation rA = service.reserveARoom(customerA, room, checkIn, checkOut);
-        assertNotNull("Reservation A must be created.", rA);
+        assertNotNull("Reservation A must be created", rA);
 
         // Second reservation for the same room & same dates should fail
         service.reserveARoom(customerB, room, checkIn, checkOut);
     }
-   
     
     // Function 2 : cancelReservation
 
-    /**
+    /*
       Case 1: Successfully cancel a single existing reservation
       Ensures the method returns true and the customer's reservation list becomes empty
-    **/
+    */
     @Test
     public void testCancelReservation_SingleExistingReservation() {
         Customer customer = createCustomer("cancel1@test.com");
@@ -210,7 +220,6 @@ public class ReservationServiceTest {
 
         Date checkIn = createDate(2026, java.util.Calendar.JANUARY, 1);
         
-        // Create a reservation
         service.reserveARoom(customer, room, checkIn, createDate(2026, java.util.Calendar.JANUARY, 5));
 
         // Pre-condition: customer has exactly 1 reservation
@@ -223,13 +232,13 @@ public class ReservationServiceTest {
         
         // Post-condition: reservation list should be empty
         Collection<Reservation> remainingReservations = service.getCustomersReservation(customer);
-        assertEquals("Post-condition: Customer must have 0 reservations", 0, remainingReservations.size());
+        assertEquals("Customer must have 0 reservations after cancellation", 0, remainingReservations.size());
     }
     
-    /**
+    /*
       Case 2: Cancel one reservation from a list of multiple reservations
       Only the matching reservation should be removed; the other must remain
-    **/
+    */
     @Test
     public void testCancelReservation_OneOfMultipleReservations() {
         Customer customer = createCustomer("cancel2@test.com");
@@ -254,14 +263,11 @@ public class ReservationServiceTest {
         
         // Post-condition: only one reservation remains
         Collection<Reservation> remainingReservations = service.getCustomersReservation(customer);
-        assertEquals("Customer must have 1 remaining reservation", 1, remainingReservations.size());
-        
-        assertTrue("The remaining reservation must be intact", remainingReservations.contains(rToKeep));
+        assertEquals("Customer must have 1 remaining reservation", 1, remainingReservations.size());     
+        assertTrue("The remaining reservation must be the one we want to keep", remainingReservations.contains(rToKeep));
     }
     
-    /**
-      Case 3: Cancellation fails when the reservation does not exist, even if the customer has other reservations
-    **/
+    // Case 3: Cancellation fails when the reservation does not exist, even if the customer has other reservations
     @Test
     public void testCancelReservation_ReservationNotFound() {
         Customer customer = createCustomer("cancel3@test.com");
@@ -269,75 +275,101 @@ public class ReservationServiceTest {
         service.addRoom(room);
 
         // Create a valid reservation
-        service.reserveARoom(customer, room, createDate(2026, java.util.Calendar.MARCH, 1), createDate(2026, java.util.Calendar.MARCH, 5));
+        service.reserveARoom(customer, room,
+                createDate(2026, java.util.Calendar.MARCH, 1),
+                createDate(2026, java.util.Calendar.MARCH, 5));
         assertEquals(1, service.getCustomersReservation(customer).size());
 
         // Try to cancel with wrong room number
-        boolean result = service.cancelReservation(customer, "C99", createDate(2026, java.util.Calendar.MARCH, 1));
+        boolean result = service.cancelReservation(customer, "C99",
+                createDate(2026, java.util.Calendar.MARCH, 1));
 
         assertFalse("Cancellation must fail as the reservation data does not match", result);
-        
+
         // Reservation list should remain unchanged
         assertEquals("Reservation count must remain 1", 1, service.getCustomersReservation(customer).size());
     }
-    
-    /**
-      Case 4: Customer has no reservations
+
+    /*
+      Case 4: Room number matches but check-in date is different
+      This covers the branch where first part of && is true and second part is false
+     */
+    @Test
+    public void testCancelReservation_RoomMatchesButCheckInDateDifferent() {
+        Customer customer = createCustomer("cancel5@test.com");
+        IRoom room = createRoom("C5", 120.0, RoomType.SINGLE);
+        service.addRoom(room);
+
+        // Existing reservation for this customer & room
+        Date correctCheckIn = createDate(2026, java.util.Calendar.AUGUST, 1);
+        Date correctCheckOut = createDate(2026, java.util.Calendar.AUGUST, 5);
+
+        service.reserveARoom(customer, room, correctCheckIn, correctCheckOut);
+        assertEquals("Pre-condition: customer must have 1 reservation", 1, service.getCustomersReservation(customer).size());
+
+        // Try to cancel with same room number but different check-in date
+        Date wrongCheckIn = createDate(2026, java.util.Calendar.AUGUST, 2);
+
+        boolean result = service.cancelReservation(customer, "C5", wrongCheckIn);
+        assertFalse("Cancellation must fail when room matches but check-in date is different", result);
+    }
+
+    /*
+      Case 5: Customer has no reservations
       The method should return false because there is nothing to cancel
-    **/
+     */
     @Test
     public void testCancelReservation_CustomerHasNoReservations() {
         Customer customer = createCustomer("cancel4@test.com");     
         
-        boolean result = service.cancelReservation(customer, "C4", createDate(2026, java.util.Calendar.APRIL, 1));
-        assertFalse("Cancellation must return false if customer reservation list is empty/null", result);
+        boolean result = service.cancelReservation(customer, "C4",
+                createDate(2026, java.util.Calendar.APRIL, 1));
+        assertFalse("Cancellation must return false if customer reservation list is empty", result);
     }
     
-    /**
-      Case 5: customer = null
+    /*
+      Case 6: customer = null
       According to the service implementation, the method should return false
-    **/
+    */
     @Test
     public void testCancelReservation_NullCustomerInput() {
         // null customer
-        boolean result = service.cancelReservation(null, "C5", createDate(2026, java.util.Calendar.MAY, 1));
-        assertFalse("Cancellation must return false if customer is null (as per code logic)", result);
+        boolean result = service.cancelReservation(null, "C5",
+                createDate(2026, java.util.Calendar.MAY, 1));
+        assertFalse("Cancellation must return false if customer is null", result);
     }
     
-    /**
-      Case 6: roomNumber = null
+    /*
+      Case 7: roomNumber = null
       The service checks for null and should return false
-    **/
+    */
     @Test
     public void testCancelReservation_NullRoomNumberInput() {
         Customer customer = createCustomer("cancel6@test.com");
         // null roomNumber
-        boolean result = service.cancelReservation(customer, null, createDate(2026, java.util.Calendar.JUNE, 1));
-        assertFalse("Cancellation must return false if roomNumber is null (as per code logic)", result);
+        boolean result = service.cancelReservation(customer, null,
+                createDate(2026, java.util.Calendar.JUNE, 1));
+        assertFalse("Cancellation must return false if roomNumber is null", result);
     }
     
-    /**
-      Case 7: Input checkInDate = null
+    /*
+      Case 8: Input checkInDate = null
       The service checks for null and should return false
-    **/
+    */
     @Test
     public void testCancelReservation_NullCheckInDateInput() {
         Customer customer = createCustomer("cancel7@test.com");
         // null checkInDate
         boolean result = service.cancelReservation(customer, "C7", null);
-        assertFalse("Cancellation must return false if checkInDate is null (as per code logic)", result);
+        assertFalse("Cancellation must return false if checkInDate is null", result);
     }
     
     
     // Function 3 : findMostPopularRoom
-
-    /**
-      Case 1: Clear winner scenario
-      Room "201" is booked 3 times, while room "100" is booked once
-      The method should return "201"
-    **/
+    
+    // Case 1: room "201" has more bookings than room "100" (3 vs 1), so we expect the method to return "201"
     @Test
-    public void testFindPopularRoom_ClearWinner() {
+    public void testFindPopularRoom_MostBookedRoom() {
         Customer c1 = createCustomer("pop1@test.com");
         Customer c2 = createCustomer("pop2@test.com");
         
@@ -347,33 +379,35 @@ public class ReservationServiceTest {
         service.addRoom(roomB);
 
         // Book Room B (201) three times
-        service.reserveARoom(c1, roomB, createDate(2026, 1, 1), createDate(2026, 1, 5));
-        service.reserveARoom(c1, roomB, createDate(2026, 1, 6), createDate(2026, 1, 10));
-        service.reserveARoom(c2, roomB, createDate(2026, 2, 1), createDate(2026, 2, 5));
+        service.reserveARoom(c1, roomB,
+                createDate(2026, java.util.Calendar.JANUARY, 1),
+                createDate(2026, java.util.Calendar.JANUARY, 5));
+        service.reserveARoom(c1, roomB,
+                createDate(2026, java.util.Calendar.JANUARY, 6),
+                createDate(2026, java.util.Calendar.JANUARY, 10));
+        service.reserveARoom(c2, roomB,
+                createDate(2026, java.util.Calendar.FEBRUARY, 1),
+                createDate(2026, java.util.Calendar.FEBRUARY, 5));
 
         // Book Room A (100) once
-        service.reserveARoom(c1, roomA, createDate(2026, 3, 1), createDate(2026, 3, 5));
+        service.reserveARoom(c1, roomA,
+                createDate(2026, java.util.Calendar.MARCH, 1),
+                createDate(2026, java.util.Calendar.MARCH, 5));
 
         String result = service.findMostPopularRoom();
 
         assertNotNull("Result should not be null", result);
-        assertEquals("The most popular room should be 201 (Room B)", "201", result);
+        assertEquals("201", result);
     }
     
-    /**
-      Case 2: No reservations exist in the system
-      The method is expected to return null
-    **/
+    // Case 2: No reservations exist in the system, The method is expected to return null
     @Test
     public void testFindPopularRoom_NoReservations() {
         String result = service.findMostPopularRoom();
         assertNull("Result must be null when there are no reservations", result);
     }
     
-    /**
-      Case 3: Tie in popularity between two rooms. 
-      Both rooms have the same number of bookings, so the result can be either one
-    **/
+    // Case 3: Both rooms have the same number of bookings, so the result can be either one
     @Test
     public void testFindPopularRoom_EqualPopularity() {
         Customer customer = createCustomer("pop3@test.com");
@@ -383,12 +417,20 @@ public class ReservationServiceTest {
         service.addRoom(roomY);
 
         // Book Room X twice
-        service.reserveARoom(customer, roomX, createDate(2026, 1, 1), createDate(2026, 1, 5));
-        service.reserveARoom(customer, roomX, createDate(2026, 1, 6), createDate(2026, 1, 10));
+        service.reserveARoom(customer, roomX,
+                createDate(2026, java.util.Calendar.JANUARY, 1),
+                createDate(2026, java.util.Calendar.JANUARY, 5));
+        service.reserveARoom(customer, roomX,
+                createDate(2026, java.util.Calendar.JANUARY, 6),
+                createDate(2026, java.util.Calendar.JANUARY, 10));
 
         // Book Room Y twice
-        service.reserveARoom(customer, roomY, createDate(2026, 2, 1), createDate(2026, 2, 5));
-        service.reserveARoom(customer, roomY, createDate(2026, 2, 6), createDate(2026, 2, 10));
+        service.reserveARoom(customer, roomY,
+                createDate(2026, java.util.Calendar.FEBRUARY, 1),
+                createDate(2026, java.util.Calendar.FEBRUARY, 5));
+        service.reserveARoom(customer, roomY,
+                createDate(2026, java.util.Calendar.FEBRUARY, 6),
+                createDate(2026, java.util.Calendar.FEBRUARY, 10));
 
         String result = service.findMostPopularRoom();
 
@@ -398,21 +440,20 @@ public class ReservationServiceTest {
                    result.equals("X10") || result.equals("Y20"));
     }
     
-    /**
-      Case 4: Only one reservation exists in the system
-      The method should return the room number associated with that reservation
-    **/
+    // Case 4: Only one reservation exists in the system, The method should return the room number associated with that reservation
     @Test
     public void testFindPopularRoom_SingleReservation() {
         Customer customer = createCustomer("pop4@test.com");
         IRoom roomZ = createRoom("Z30", 300.0, RoomType.DOUBLE);
         service.addRoom(roomZ);
 
-        service.reserveARoom(customer, roomZ, createDate(2026, 3, 1), createDate(2026, 3, 5));
+        service.reserveARoom(customer, roomZ,
+                createDate(2026, java.util.Calendar.MARCH, 1),
+                createDate(2026, java.util.Calendar.MARCH, 5));
 
         String result = service.findMostPopularRoom();
 
         assertNotNull("Result should not be null", result);
-        assertEquals("The most popular room should be the only room booked (Z30)", "Z30", result);
+        assertEquals("The most popular room should be Z30", "Z30", result);
     }
 }
