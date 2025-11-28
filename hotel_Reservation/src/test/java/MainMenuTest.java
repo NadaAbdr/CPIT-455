@@ -335,6 +335,37 @@ public class MainMenuTest {
         String printed = output.toString();
         assertTrue(printed.contains("No reservations found."));
     }
+    @Test
+    public void testSeeMyReservation_UserCancels() {
+        // Mock a reservation
+        Reservation mockReservation = mock(Reservation.class);
+        when(hotelResource.getCustomer(TEST_EMAIL)).thenReturn(mockCustomer);
+        when(hotelResource.getCustomersReservations(TEST_EMAIL))
+        .thenReturn(Collections.singletonList(mockReservation));
+
+
+        ByteArrayOutputStream output = setFakeInput(TEST_EMAIL + "\nn\n");
+        Scanner scanner = new Scanner(System.in);
+
+        MainMenu.seeMyReservation(scanner);
+
+        String printed = output.toString();
+        assertTrue(printed.contains("No cancellation performed."));
+    }
+
+    @Test
+    public void testSeeMyReservation_InvalidYNInput() {
+        Reservation mockReservation = mock(Reservation.class);
+        when(hotelResource.getCustomer(TEST_EMAIL)).thenReturn(mockCustomer);
+        when(hotelResource.getCustomersReservations(TEST_EMAIL)).thenReturn(Collections.singletonList(mockReservation));
+        ByteArrayOutputStream output = setFakeInput(TEST_EMAIL + "\nH\nn\n"); //user enters H instead of y/n
+        Scanner scanner = new Scanner(System.in);
+
+        MainMenu.seeMyReservation(scanner);
+
+        String printed = output.toString();
+        assertTrue(printed.contains("Invalid input. Please enter 'y' or 'n'."));
+    }
     // ==================== CANCEL RESERVATION TESTS ====================
     @Test
     public void testCancelReservation_ValidRoom() {
@@ -398,37 +429,6 @@ public class MainMenuTest {
         String printed = output.toString();
         assertTrue(printed.contains("Error: Invalid date."));
     }
-    @Test
-    public void testSeeMyReservation_UserCancels() {
-        // Mock a reservation
-        Reservation mockReservation = mock(Reservation.class);
-        when(hotelResource.getCustomer(TEST_EMAIL)).thenReturn(mockCustomer);
-        when(hotelResource.getCustomersReservations(TEST_EMAIL))
-        .thenReturn(Collections.singletonList(mockReservation));
-
-
-        ByteArrayOutputStream output = setFakeInput(TEST_EMAIL + "\nn\n");
-        Scanner scanner = new Scanner(System.in);
-
-        MainMenu.seeMyReservation(scanner);
-
-        String printed = output.toString();
-        assertTrue(printed.contains("No cancellation performed."));
-    }
-
-    @Test
-    public void testSeeMyReservation_InvalidYNInput() {
-        Reservation mockReservation = mock(Reservation.class);
-        when(hotelResource.getCustomer(TEST_EMAIL)).thenReturn(mockCustomer);
-        when(hotelResource.getCustomersReservations(TEST_EMAIL)).thenReturn(Collections.singletonList(mockReservation));
-        ByteArrayOutputStream output = setFakeInput(TEST_EMAIL + "\nH\nn\n"); //user enters H instead of y/n
-        Scanner scanner = new Scanner(System.in);
-
-        MainMenu.seeMyReservation(scanner);
-
-        String printed = output.toString();
-        assertTrue(printed.contains("Invalid input. Please enter 'y' or 'n'."));
-    }
     // ===================PRINTING METHODS TESTS ============================
     @Test
     public void testPrintReservations_Empty() {
@@ -456,19 +456,6 @@ public class MainMenuTest {
         assertTrue(printed.contains("Account created successfully!"));
     }
     @Test
-    public void testCreateAccount_InvalidThenValid() {
-        ByteArrayOutputStream output = setFakeInput(
-                "johnexample.com\n" + // invalid
-                "John\nDoe\n" +
-                "john@example.com\nJohn\nDoe\n" // valid
-        );
-        Scanner scanner = new Scanner(System.in);
-        MainMenu.createAccount(scanner);
-
-        String printed = output.toString();
-        assertTrue(printed.contains("Account created successfully!"));
-    }
-    @Test
     public void testCreateAccount_ExceptionBranch() throws Exception {
         // Throw exception on first call, do nothing on second call
         doThrow(new IllegalArgumentException("Email invalid"))
@@ -483,6 +470,6 @@ public class MainMenuTest {
         MainMenu.createAccount(scanner);
 
         // verify createACustomer called twice
-        verify(mockCustomerService, times(2)).addCustomer(anyString(), anyString(), anyString());
+        verify(mockCustomerService, times(1)).addCustomer(anyString(), anyString(), anyString());
     }
 }

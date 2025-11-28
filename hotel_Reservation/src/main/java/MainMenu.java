@@ -206,7 +206,6 @@ public class MainMenu {
 
             if("y".equals(choice)) {
                 cancelReservation(scanner, customerEmail);
-                break;
             } else if ("n".equals(choice)) {
                 System.out.println("No cancellation performed.");
                 break;
@@ -268,7 +267,6 @@ public class MainMenu {
             printMainMenu();
         } catch (IllegalArgumentException ex) {
             System.out.println(ex.getLocalizedMessage());
-            createAccount(scanner); // pass the same Scanner
         }
     }
 
